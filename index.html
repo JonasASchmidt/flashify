@@ -13,26 +13,28 @@
     /* Desktop Defaults */
     --drop-margin:24px;
     --drop-radius:48px;
-    --drawer-inset:32px;      /* Abstand des Overlays zu Drop-Area-Innenkante */
+    --drawer-inset:32px;      /* Abstand Overlay zu Drop-Area-Innenkante */
     --drawer-pad:32px;        /* Innen-Padding Overlay */
     --border-w:4px; --dash-l:16px; --gap-l:16px;
     --stroke-normal:.25; --stroke-hover:.5;
     --btn-h:52px; --btn-fs:20px; --btn-pad-x:24px;
     --t-sync:.125s; --range-w:128px;
     --cols-gap:36px;          /* Spaltengap im Overlay */
-    --group-gap:12px;         /* interner Gruppenabstand */
+    --group-gap:12px;         /* interner Gruppenabstand (Desktop) */
   }
+
   /* Kompakt für schmale Geräte wie iPhone 12 mini */
   @media (max-width: 420px){
     :root{
       --drop-margin:12px;
       --drop-radius:40px;           /* 8px weniger als Desktop */
-      --drawer-inset:6px;           /* halber Drop-Margin */
-      --drawer-pad:16px;            /* halbes Desktop-Padding */
+      /* Neu: Overlay auf Mobile mit +8px mehr Margin & +12px mehr Padding */
+      --drawer-inset:14px;          /* vorher 6px → jetzt 14px */
+      --drawer-pad:28px;            /* vorher 16px → jetzt 28px */
       --btn-h:46px; --btn-fs:18px; --btn-pad-x:18px;
       --range-w:112px;
       --cols-gap:24px;              /* engeres Spaltengap */
-      --group-gap:24px;             /* vert. Abstand zwischen Gruppen in einer Spalte */
+      --group-gap:36px;             /* vert. Abstand zwischen Gruppen je Spalte */
     }
   }
 
@@ -44,6 +46,7 @@
     -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   }
   button,input,select,textarea{font-family:inherit}
+  .nowrap{white-space:nowrap; display:inline-block}
 
   .drop{
     position:fixed;
@@ -70,6 +73,7 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
     transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out;
     max-width:92%;
+    padding-top:36px; padding-bottom:36px; /* Mindestabstand Top/Bottom */
   }
   h1{
     margin:0; font-weight:800; letter-spacing:.2px;
@@ -79,7 +83,12 @@
     max-width:88%;
   }
   @media (max-width:420px){
+    /* Mobile größer – bricht in 2–3 Zeilen, ohne Trennung */
     h1{ font-size:clamp(34px,9.6vw,64px); max-width:92%; }
+  }
+  /* Portrait: 1.75x gegenüber der mobilen Basis */
+  @media (max-width:420px) and (orientation:portrait){
+    h1{ font-size:clamp(60px,18vw,108px); }
   }
 
   .actions{display:flex;gap:8px;pointer-events:auto;transition:all var(--t-sync) ease-in-out;flex-wrap:wrap;justify-content:center}
@@ -160,6 +169,10 @@
     max-height:calc(100% - (var(--drawer-inset)*2));
     overflow:auto;
   }
+  /* Nur auf Mobile: Overlay-Ecken +4px → näher an Drop-Radius */
+  @media (max-width:420px){
+    .drawer{ border-radius:calc(var(--drop-radius) - 12px); }
+  }
   .drawer.show{display:block}
   .drawer .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
   .drawer h2{margin:0;font-size:16px;font-weight:800;text-align:left}
@@ -184,7 +197,7 @@
   .drawer input[type="range"]::-moz-range-track{height:2px;background:rgba(255,255,255,.35);border:0;border-radius:0}
   .drawer select{height:32px;background:#000;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:0 8px;transition:all var(--t-sync) ease-in-out;max-width:100%}
 
-  /* Randomize/Reset unten rechts als Grid-Item (überlappt nichts) */
+  /* Randomize/Reset unten rechts als Grid-Item (kollisionsfrei) */
   .gtools{
     display:flex; gap:6px; align-self:end; justify-self:end;
     grid-column: -2 / -1; /* letzte Spalte */
@@ -343,7 +356,7 @@
           </div>
         </section>
 
-        <!-- Tools unten rechts, kollisionsfrei -->
+        <!-- Tools unten rechts -->
         <div class="gtools">
           <button id="btnRandom" class="btn btnGhost btn--sm" title="Randomize parameters"><span class="label">Randomize</span></button>
           <button id="btnReset"  class="btn btnGhost btn--sm" title="Reset"><span class="label">Reset</span></button>
@@ -434,8 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
     set('cFlash',p.flash);set('cFlStr',p.flashStrength);set('cFlFreq',p.flashFreq);
     updateRangeDecorations();
   }
-  function saveParams(){ try{localStorage.setItem('flashify.params.v29',JSON.stringify(S.params))}catch{} }
-  function loadParams(){ try{const raw=localStorage.getItem('flashify.params.v29'); if(raw) Object.assign(S.params,JSON.parse(raw)||{});}catch{} writeControls(); }
+  function saveParams(){ try{localStorage.setItem('flashify.params.v30',JSON.stringify(S.params))}catch{} }
+  function loadParams(){ try{const raw=localStorage.getItem('flashify.params.v30'); if(raw) Object.assign(S.params,JSON.parse(raw)||{});}catch{} writeControls(); }
   function onParams(){
     const g=id=>$(id), p=S.params;
     p.speed=+g('cSpeed').value; p.zoomPct=+g('cZoom').value; p.wobble=+g('cWobble').value; p.rotate=+g('cRotate').value; p.fps=+g('cFPS').value; p.secs=+g('cSecs').value;
@@ -493,10 +506,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown',e=>{ if(S.busy) return; if(e.key && e.key.toLowerCase()==='d'){ document.body.classList.toggle('debugOn'); } });
 
   function setTitle(st){
-    const idleText = S.mobile ? 'Tap to flashify … ⚡️' : 'Drop to flashify … ⚡️';
+    const idleText = S.mobile ? 'Tap to flashify … <span class="nowrap">⚡️</span>' : 'Drop to flashify … <span class="nowrap">⚡️</span>';
     if(st==='loading'){title.classList.add('busy');title.innerHTML=`Loading <span class="dots"><span>.</span><span>.</span><span>.</span></span>`;}
-    else if(st==='processing'){title.classList.add('busy');title.innerHTML=`Flashifying <span class="dots"><span>.</span><span>.</span><span>.</span></span> ⚡️`;}
-    else{title.classList.remove('busy');title.textContent=idleText;}
+    else if(st==='processing'){title.classList.add('busy');title.innerHTML=`Flashifying <span class="dots"><span>.</span><span>.</span><span>.</span></span> <span class="nowrap">⚡️</span>`;}
+    else{title.classList.remove('busy');title.innerHTML=idleText;}
   }
 
   function openMenu(){if(S.busy || !S.hasUserImage) return; menu.classList.add('open');chev.setAttribute('aria-expanded','true');S.menu=true}
