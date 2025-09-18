@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Flashify your image ...</title>
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,18 +10,49 @@
 
 <style>
   :root{
-    --drop-radius:48px; --drop-margin:24px;
+    /* Desktop Defaults */
+    --drop-margin:24px;
+    --drop-radius:48px;
+    --drawer-inset:32px;      /* Abstand des Overlays zu Drop-Area-Innenkante */
+    --drawer-pad:32px;        /* Innen-Padding Overlay */
     --border-w:4px; --dash-l:16px; --gap-l:16px;
     --stroke-normal:.25; --stroke-hover:.5;
     --btn-h:52px; --btn-fs:20px; --btn-pad-x:24px;
     --t-sync:.125s; --range-w:128px;
+    --cols-gap:36px;          /* Spaltengap im Overlay */
+    --group-gap:12px;         /* interner Gruppenabstand */
   }
+  /* Kompakt für schmale Geräte wie iPhone 12 mini */
+  @media (max-width: 420px){
+    :root{
+      --drop-margin:12px;
+      --drop-radius:40px;           /* 8px weniger als Desktop */
+      --drawer-inset:6px;           /* halber Drop-Margin */
+      --drawer-pad:16px;            /* halbes Desktop-Padding */
+      --btn-h:46px; --btn-fs:18px; --btn-pad-x:18px;
+      --range-w:112px;
+      --cols-gap:24px;              /* engeres Spaltengap */
+      --group-gap:24px;             /* vert. Abstand zwischen Gruppen in einer Spalte */
+    }
+  }
+
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
-  body{font-family:"Funnel Display",Helvetica,"Helvetica Neue",Arial,sans-serif;background:#040915;color:#fff}
+  body{
+    font-family:"Funnel Display",Helvetica,"Helvetica Neue",Arial,sans-serif;
+    background:#040915;color:#fff;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
   button,input,select,textarea{font-family:inherit}
 
-  .drop{position:fixed;inset:var(--drop-margin);display:grid;place-items:center;border-radius:var(--drop-radius);overflow:hidden;cursor:pointer;isolation:isolate;transition:filter var(--t-sync) ease-in-out}
+  .drop{
+    position:fixed;
+    inset:var(--drop-margin);
+    display:grid; place-items:center;
+    border-radius:var(--drop-radius);
+    overflow:hidden; cursor:pointer; isolation:isolate;
+    transition:filter var(--t-sync) ease-in-out;
+  }
   .drop:hover{filter:brightness(1.06)}
   .drop.flash::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;pointer-events:none;animation:flash .45s ease}
   @keyframes flash{0%{opacity:1}100%{opacity:0}}
@@ -34,10 +65,24 @@
   #ph{opacity:0;transition:opacity var(--t-sync) ease-in-out}
   #ph.show{opacity:1} #ph.hide{opacity:0}
 
-  .center{position:relative;z-index:2;text-align:center;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out}
-  h1{margin:0;font-weight:800;letter-spacing:.2px;font-size:clamp(28px,6vw,54px);line-height:1.06;text-shadow:0 2px 16px rgba(0,0,0,.45)}
+  .center{
+    position:relative; z-index:2; text-align:center; pointer-events:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
+    transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out;
+    max-width:92%;
+  }
+  h1{
+    margin:0; font-weight:800; letter-spacing:.2px;
+    font-size:clamp(28px,6vw,54px); line-height:1.06;
+    text-shadow:0 2px 16px rgba(0,0,0,.45);
+    -webkit-hyphens:none; hyphens:none; word-break:normal; overflow-wrap:normal;
+    max-width:88%;
+  }
+  @media (max-width:420px){
+    h1{ font-size:clamp(34px,9.6vw,64px); max-width:92%; }
+  }
 
-  .actions{display:flex;gap:8px;pointer-events:auto;transition:all var(--t-sync) ease-in-out}
+  .actions{display:flex;gap:8px;pointer-events:auto;transition:all var(--t-sync) ease-in-out;flex-wrap:wrap;justify-content:center}
   .hidden{display:none!important}
 
   .drop.processing .actions .btn,
@@ -105,7 +150,16 @@
   .switch input:checked + .slider{background:#fff}
   .switch input:checked + .slider::before{transform:translateX(18px)}
 
-  .drawer{position:absolute;left:32px;right:32px;bottom:32px;z-index:6;display:none;background:rgba(0,0,0,.86);border-radius:calc(var(--drop-radius) - 16px);padding:32px;transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out;max-height:calc(100% - 64px);overflow:auto}
+  .drawer{
+    position:absolute;
+    left:var(--drawer-inset); right:var(--drawer-inset); bottom:var(--drawer-inset);
+    z-index:6; display:none; background:rgba(0,0,0,.86);
+    border-radius:calc(var(--drop-radius) - 16px);
+    padding:var(--drawer-pad);
+    transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out;
+    max-height:calc(100% - (var(--drawer-inset)*2));
+    overflow:auto;
+  }
   .drawer.show{display:block}
   .drawer .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
   .drawer h2{margin:0;font-size:16px;font-weight:800;text-align:left}
@@ -113,10 +167,11 @@
   .drawer .close{background:transparent;border:0;color:#fff;font-weight:800;font-size:18px;cursor:pointer;line-height:1;transition:all var(--t-sync) ease-in-out}
   .drawer .close:hover{opacity:.85;transform:rotate(6deg)}
 
-  .cols{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:36px;align-items:start}
+  .cols{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:var(--cols-gap);align-items:start}
   @media (max-width:1100px){.cols{grid-template-columns:1fr 1fr}}
   @media (max-width:800px){.cols{grid-template-columns:1fr}}
   .group{border:0;border-radius:10px;padding:10px 0}
+  .group + .group{margin-top:var(--group-gap)}
   .group .title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
   .group .glabel{font-weight:800;font-size:13px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .group .glabel.gradText{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -127,9 +182,16 @@
   .drawer input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#fff;border:0;border-radius:50%;cursor:pointer}
   .drawer input[type="range"]::-moz-range-thumb{width:14px;height:14px;background:#fff;border:0;border-radius:50%;cursor:pointer}
   .drawer input[type="range"]::-moz-range-track{height:2px;background:rgba(255,255,255,.35);border:0;border-radius:0}
-  .drawer select{height:32px;background:#000;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:0 8px;transition:all var(--t-sync) ease-in-out}
+  .drawer select{height:32px;background:#000;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:0 8px;transition:all var(--t-sync) ease-in-out;max-width:100%}
 
-  .gtools{position:absolute;right:32px;bottom:32px;display:flex;gap:6px}
+  /* Randomize/Reset unten rechts als Grid-Item (überlappt nichts) */
+  .gtools{
+    display:flex; gap:6px; align-self:end; justify-self:end;
+    grid-column: -2 / -1; /* letzte Spalte */
+  }
+  @media (max-width:800px){
+    .gtools{grid-column: 1 / -1; justify-self:end; margin-top:8px;}
+  }
   .gtools .btn{height:36px;font-size:16px;padding:0 12px;border-radius:10px}
 
   .minmax{display:none;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);pointer-events:none}
@@ -195,7 +257,7 @@
         <button class="close" id="closeDrawer" aria-label="Close">✕</button>
       </div>
 
-      <div class="cols">
+      <div class="cols" id="cols">
         <!-- Global -->
         <section class="group" id="group-global">
           <div class="g1">
@@ -280,11 +342,12 @@
             <div class="tool"><label for="cGltFreq" title="Frequency">Frequency</label><input id="cGltFreq" type="range" min="0.5" max="6" step="0.5" value="3"></div>
           </div>
         </section>
-      </div>
 
-      <div class="gtools">
-        <button id="btnRandom" class="btn btnGhost btn--sm" title="Randomize parameters"><span class="label">Randomize</span></button>
-        <button id="btnReset" class="btn btnGhost btn--sm" title="Reset"><span class="label">Reset</span></button>
+        <!-- Tools unten rechts, kollisionsfrei -->
+        <div class="gtools">
+          <button id="btnRandom" class="btn btnGhost btn--sm" title="Randomize parameters"><span class="label">Randomize</span></button>
+          <button id="btnReset"  class="btn btnGhost btn--sm" title="Reset"><span class="label">Reset</span></button>
+        </div>
       </div>
     </div>
 
@@ -314,7 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
     busy:false, precomputing:false,
     cache:{key:null,sqBlob:null,origBlob:null,sqURL:null,origURL:null,params:null,bmpSig:null},
     preTimer:null,
-    hasUserImage:false
+    hasUserImage:false,
+    mobile:false
   };
 
   const $=id=>document.getElementById(id);
@@ -329,9 +393,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const raf=()=>new Promise(r=>requestAnimationFrame(r));
   const idle=(fn)=>{ if('requestIdleCallback' in window) requestIdleCallback(fn,{timeout:1000}); else setTimeout(fn,600); };
 
-  function fitCanvasTo(el,cv){const r=el.getBoundingClientRect();const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
-    cv.width=Math.floor(r.width*dpr); cv.height=Math.floor(r.height*dpr); cv.style.width=r.width+'px'; cv.style.height=r.height+'px';
-    const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.imageSmoothingEnabled=true; try{x.imageSmoothingQuality='high'}catch{}; cv._w=r.width; cv._h=r.height;
+  function detectMobile(){
+    S.mobile = (window.matchMedia && (matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 480px)').matches));
+  }
+
+  function fitCanvasTo(el,cv){
+    const r=el.getBoundingClientRect();const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    cv.width=Math.floor(r.width*dpr); cv.height=Math.floor(r.height*dpr);
+    cv.style.width=r.width+'px'; cv.style.height=r.height+'px';
+    const x=cv.getContext('2d');
+    x.setTransform(dpr,0,0,dpr,0,0); x.imageSmoothingEnabled=true; try{x.imageSmoothingQuality='high'}catch{};
+    cv._w=r.width; cv._h=r.height;
   }
   const cover=(W,H,iw,ih)=>Math.max(W/iw,H/ih);
   const effSecs=(p=S.params)=> p.secs/Math.max(0.1,p.speed);
@@ -342,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let pathLen=0;
   function buildBorder(){
     const r=drop.getBoundingClientRect(); const W=Math.round(r.width), H=Math.round(r.height);
-    const sw=parseFloat(getComputedStyle(dash).strokeWidth)||4; const inset=sw/2, Rfull=48, R=Math.max(0,Rfull-inset);
+    const sw=parseFloat(getComputedStyle(dash).strokeWidth)||4; const inset=sw/2, Rfull=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--drop-radius'))||48, R=Math.max(0,Rfull-inset);
     const d=[`M ${R+inset} ${inset}`,`H ${W-R-inset}`,`A ${R} ${R} 0 0 1 ${W-inset} ${R+inset}`,`V ${H-R-inset}`,`A ${R} ${R} 0 0 1 ${W-R-inset} ${H-inset}`,`H ${R+inset}`,`A ${R} ${R} 0 0 1 ${inset} ${H-R-inset}`,`V ${R+inset}`,`A ${R} ${R} 0 0 1 ${R+inset} ${inset}`,`Z`].join(' ');
     svg.setAttribute('viewBox',`0 0 ${W} ${H}`); dash.setAttribute('d',d); prog.setAttribute('d',d);
     try{ pathLen=prog.getTotalLength(); prog.style.strokeDasharray=`${pathLen}`; prog.style.strokeDashoffset=`${pathLen}`; }catch{}
@@ -362,8 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
     set('cFlash',p.flash);set('cFlStr',p.flashStrength);set('cFlFreq',p.flashFreq);
     updateRangeDecorations();
   }
-  function saveParams(){ try{localStorage.setItem('flashify.params.v28',JSON.stringify(S.params))}catch{} }
-  function loadParams(){ try{const raw=localStorage.getItem('flashify.params.v28'); if(raw) Object.assign(S.params,JSON.parse(raw)||{});}catch{} writeControls(); }
+  function saveParams(){ try{localStorage.setItem('flashify.params.v29',JSON.stringify(S.params))}catch{} }
+  function loadParams(){ try{const raw=localStorage.getItem('flashify.params.v29'); if(raw) Object.assign(S.params,JSON.parse(raw)||{});}catch{} writeControls(); }
   function onParams(){
     const g=id=>$(id), p=S.params;
     p.speed=+g('cSpeed').value; p.zoomPct=+g('cZoom').value; p.wobble=+g('cWobble').value; p.rotate=+g('cRotate').value; p.fps=+g('cFPS').value; p.secs=+g('cSecs').value;
@@ -421,9 +493,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown',e=>{ if(S.busy) return; if(e.key && e.key.toLowerCase()==='d'){ document.body.classList.toggle('debugOn'); } });
 
   function setTitle(st){
+    const idleText = S.mobile ? 'Tap to flashify … ⚡️' : 'Drop to flashify … ⚡️';
     if(st==='loading'){title.classList.add('busy');title.innerHTML=`Loading <span class="dots"><span>.</span><span>.</span><span>.</span></span>`;}
     else if(st==='processing'){title.classList.add('busy');title.innerHTML=`Flashifying <span class="dots"><span>.</span><span>.</span><span>.</span></span> ⚡️`;}
-    else{title.classList.remove('busy');title.textContent='Drop to flashify … ⚡️';}
+    else{title.classList.remove('busy');title.textContent=idleText;}
   }
 
   function openMenu(){if(S.busy || !S.hasUserImage) return; menu.classList.add('open');chev.setAttribute('aria-expanded','true');S.menu=true}
@@ -474,16 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
     }
     ctx.restore();
-  }
-  function multiSin(yN,f,phase,sources){let v=0;for(let s=1;s<=sources;s++){v+=Math.sin(yN*(f*s)*2*Math.PI+phase*s)/sources}return v}
-  function liquifyFromPadded(dst,P,p,W,H,amp,freq,phase,srcs){
-    const step=2;
-    for(let y=0;y<H;y+=step){
-      const yn=y/H;
-      const dx=multiSin(yn,freq,phase,srcs)*amp;
-      const sx=Math.max(0,Math.min(P.width-W,Math.round(p - dx)));
-      dst.drawImage(P, sx, y+p, W, step, 0, y, W, step);
-    }
   }
   function applyExtras(ctx,W,H,t,params,srcCanvas){
     if(params.grad){
@@ -599,7 +662,6 @@ document.addEventListener('DOMContentLoaded', () => {
     shield.style.pointerEvents = S.busy?'auto':'none';
   }
 
-  // Speichern: bevorzugt nativer Picker (sicherer Kontext), ansonsten <a download>.
   async function nativeSave(blob, filename){
     const hasPicker = 'showSaveFilePicker' in window && window.isSecureContext;
     if (hasPicker){
@@ -612,12 +674,9 @@ document.addEventListener('DOMContentLoaded', () => {
         await writable.write(blob); await writable.close();
         return 'picker';
       }catch(e){
-        // Bei Abbruch KEIN Fallback → keine „stille“ Speicherung
         if(e && e.name==='AbortError') return 'canceled';
-        // Bei echten Fehlern (z. B. Permissions) fällt es auf Anchor zurück
       }
     }
-    // Fallback: Anchor (kann ohne Dialog in Downloads landen)
     const url = URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=filename||'flashy.gif'; a.rel='noopener';
     document.body.appendChild(a); a.click(); a.remove();
@@ -798,14 +857,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   (async function initApp(){
+    detectMobile();
     setTitle('loading');
     loadParams(); fitCanvasTo(drop,live); buildBorder(); attachDecorations();
     await tryLoadDemo();
     setTitle('idle');
-    log('Ready. Click background or drop a file. Press "F" for controls, "D" for debug values.');
+    log('Ready. Tap/Click background or drop a file. Press "F" for controls, "D" for debug values.');
   })();
 
-  addEventListener('resize',()=>{fitCanvasTo(drop,live); buildBorder(); updateRangeDecorations(); if(S.bmp) drawLive(performance.now()/1000)},{passive:true});
+  addEventListener('resize',()=>{
+    detectMobile();
+    fitCanvasTo(drop,live); buildBorder(); updateRangeDecorations();
+    if(!S.busy) setTitle('idle');
+    if(S.bmp) drawLive(performance.now()/1000)
+  },{passive:true});
 });
 </script>
 </body>
