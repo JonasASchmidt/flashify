@@ -25,12 +25,12 @@
     :root{
       --drop-margin:12px;
       --drop-radius:40px;
-      --drawer-inset:14px;    /* +8px vs vorher */
-      --drawer-pad:28px;      /* +12px vs vorher */
+      --drawer-inset:14px;
+      --drawer-pad:28px;
       --btn-h:46px; --btn-fs:18px; --btn-pad-x:18px;
       --range-w:112px;
       --cols-gap:24px;
-      --group-gap:36px;       /* vertikaler Abstand zw. Gruppen */
+      --group-gap:36px;
     }
   }
 
@@ -70,25 +70,26 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
     transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out;
     max-width:92%;
-    padding-top:36px; padding-bottom:36px; /* Mindestabstand Top/Bottom */
+    padding-top:36px; padding-bottom:36px;
   }
+
+  /* ---- Headline: feste Breite, damit „…“ + ⚡️ nicht umbrechen ---- */
   h1{
-    margin:0; padding:0 4px;  /* etwas weniger horizontaler Puffer für Fits */
+    margin:0; padding:0 4px;
     font-weight:800; letter-spacing:.2px;
     font-size:clamp(28px,6vw,54px); line-height:1.06;
     text-shadow:0 2px 16px rgba(0,0,0,.45);
     -webkit-hyphens:none; hyphens:none; word-break:normal; overflow-wrap:normal;
-    max-width:94%;           /* mehr nutzbare Breite gegen Umbruch */
+    width:75vw; max-width:75vw;  /* Desktop: 75vw */
   }
   /* Mobile Basis */
   @media (max-width:420px){
-    .center{max-width:98%}   /* mehr Breite für Überschrift */
-    h1{ font-size:clamp(34px,9.6vw,64px); max-width:98%; }
+    .center{max-width:98%}
+    h1{ font-size:clamp(34px,9.6vw,64px); }
   }
-  /* Mobile Portrait – **reduziert auf 0.75** der früheren 1.75x-Größe */
+  /* Mobile Portrait – 0.75x der früheren großen Variante + 90vw Breite */
   @media (max-width:420px) and (orientation:portrait){
-    /* vorher: clamp(60px,18vw,108px) → jetzt *0.75 */
-    h1{ font-size:clamp(45px,13.5vw,81px); }
+    h1{ font-size:clamp(45px,13.5vw,81px); width:90vw; max-width:90vw; }
   }
 
   .actions{display:flex;gap:8px;pointer-events:auto;transition:all var(--t-sync) ease-in-out;flex-wrap:wrap;justify-content:center}
@@ -115,7 +116,7 @@
 
   .gradText{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  .dots{display:inline;margin-left:.1em; white-space:nowrap} /* nie umbrechen */
+  .dots{display:inline;margin-left:.1em; white-space:nowrap}
   .dots span{display:inline;opacity:.25}
   @keyframes blinkDot{0%{opacity:.25}8%{opacity:1}20%{opacity:.25}100%{opacity:.25}}
   .busy .dots span{animation:blinkDot 1.05s infinite ease-in-out both}
@@ -136,7 +137,7 @@
   .menu .item:hover .label{background:none;color:#000}
   .menu .item:active{transform:translateY(1px)}
 
-  /* **Mobile**: Panel mittig, Breite ans Viewport begrenzen, umbrechen, Sichtbarkeit in Landscape */
+  /* Mobile Dropdown: mittig, max. Breite = Viewport, Umbruch, Sichtbarkeit Landscape */
   @media (max-width: 420px){
     .menu .panel{
       left:50%; transform:translateX(-50%);
@@ -147,7 +148,7 @@
     }
     .menu .item{
       width:100%;
-      white-space:normal;          /* label darf umbrechen */
+      white-space:normal;
       text-align:center;
       line-height:1.15;
       padding-left:16px; padding-right:16px;
@@ -394,6 +395,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js" crossorigin="anonymous"></script>
 
 <script>
+/* --- (JS unverändert gegenüber letzter Version) --- */
 document.addEventListener('DOMContentLoaded', () => {
   const CFG={IG_SIZE:1080,QUALITY:15, MAX_MB:15};
   const DEFAULT_PARAMS={
@@ -557,7 +559,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('subline').addEventListener('click',e=>{if(S.busy) return; e.stopPropagation();toggleControls()});
   $('closeDrawer').addEventListener('click',()=>toggleControls(false));
 
-  /* ---------- Feedback / Toast ---------- */
   let vote=null, toastTimer=null;
   function hideToast(){ toast.classList.remove('show'); toast.innerHTML=''; }
   function scheduleToastAutoclose(ms=5000){ if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; } toastTimer=setTimeout(()=>{ hideToast(); }, ms); }
@@ -566,7 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('thumbUp').addEventListener('click',e=>{ if(S.busy) return; e.stopPropagation(); const was=(vote==='up'); vote=was?null:'up'; e.currentTarget.classList.toggle('active',vote==='up'); $('thumbDown').classList.remove('active'); hideToast(); if(vote==='up') showThanksToast(); });
   $('thumbDown').addEventListener('click',e=>{ if(S.busy) return; e.stopPropagation(); const was=(vote==='down'); vote=was?null:'down'; e.currentTarget.classList.toggle('active',vote==='down'); $('thumbUp').classList.remove('active'); hideToast(); if(vote==='down'){ const to='jonas.a.schmidt+flashify@gmail.com'; const subj=`Flashify feedback — negative — ${humanStamp()}`; const body=`What's wrong?\n\nParams (JSON):\n${JSON.stringify(S.params,null,2)}\n\nUser agent:\n${navigator.userAgent}`; location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`; } });
 
-  /* ---------- Rendering pipeline (unverändert) ---------- */
   let stage=null, liq=null, pad=null, padCtx=null;
   function ensureStage(W,H){ if(!stage){stage=document.createElement('canvas');} if(!liq){liq=document.createElement('canvas');} if(stage.width!==W||stage.height!==H){stage.width=W;stage.height=H;} if(liq.width!==W||liq.height!==H){liq.width=W;liq.height=H;} }
   function ensurePad(W,H,p){const needW=W+2*p, needH=H+2*p; if(!pad || pad.width!==needW || pad.height!==needH){pad=document.createElement('canvas'); pad.width=needW; pad.height=needH; padCtx=pad.getContext('2d',{willReadFrequently:true}); padCtx.imageSmoothingEnabled=true; try{padCtx.imageSmoothingQuality='high'}catch{}}}
@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await img.decode();
     const name = nameGuess || (src.split('/').pop() || 'demo.jpg');
 
-    S.hasUserImage = false; // Demo nicht exportieren
+    S.hasUserImage = false;
     setTitle('loading'); actions.classList.add('hidden'); feedback.classList.add('hidden');
     drop.classList.remove('ready'); setBorderProgress(0); S.phHidden=false; cleanURLs(); invalidateCache();
     S.file=null; S.origNameBase=baseNoExt(name);
