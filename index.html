@@ -10,7 +10,7 @@
 
 <style>
   :root{
-    --drop-margin:24px;
+    --drop-margin:16px;             /* überall 16px */
     --drop-radius:48px;
     --drawer-inset:32px;
     --drawer-pad:32px;
@@ -18,18 +18,19 @@
     --stroke-normal:.25; --stroke-hover:.5;
     --btn-h:52px; --btn-fs:20px; --btn-pad-x:24px;
     --t-sync:.125s; --range-w:128px;
-    --cols-gap:36px; --group-gap:12px;
+    --cols-gap:36px;
+    --group-gap:36px;               /* 36px vertikal zwischen Gruppen */
   }
 
   @media (max-width: 420px){
     :root{
-      --drop-margin:12px;
+      --drop-margin:16px;           /* auch mobil 16px */
       --drop-radius:40px;
-      --drawer-inset:14px;
-      --drawer-pad:28px;
+      --drawer-inset:22px;          /* mehr Luft mobil */
+      --drawer-pad:40px;
       --btn-h:46px; --btn-fs:18px; --btn-pad-x:18px;
       --range-w:112px;
-      --cols-gap:24px;
+      --cols-gap:36px;
       --group-gap:36px;
     }
   }
@@ -46,8 +47,7 @@
   .emoji{display:inline;vertical-align:baseline}
 
   .drop{
-    position:fixed;
-    inset:var(--drop-margin);
+    position:fixed; inset:var(--drop-margin);
     display:grid; place-items:center;
     border-radius:var(--drop-radius);
     overflow:hidden; cursor:pointer; isolation:isolate;
@@ -70,26 +70,25 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
     transition:opacity var(--t-sync) ease-in-out,transform var(--t-sync) ease-in-out;
     max-width:92%;
-    padding-top:36px; padding-bottom:36px;
+    padding-top:36px; padding-bottom:36px; /* mind. 36px oben/unten */
   }
 
-  /* ---- Headline: feste Breite, damit „…“ + ⚡️ nicht umbrechen ---- */
+  /* Headline: feste Breite, damit „…“ + ⚡️ nicht umbrechen */
   h1{
     margin:0; padding:0 4px;
     font-weight:800; letter-spacing:.2px;
     font-size:clamp(28px,6vw,54px); line-height:1.06;
     text-shadow:0 2px 16px rgba(0,0,0,.45);
     -webkit-hyphens:none; hyphens:none; word-break:normal; overflow-wrap:normal;
-    width:75vw; max-width:75vw;  /* Desktop: 75vw */
+    width:75vw; max-width:75vw;   /* Desktop: 75vw */
   }
-  /* Mobile Basis */
   @media (max-width:420px){
     .center{max-width:98%}
     h1{ font-size:clamp(34px,9.6vw,64px); }
   }
-  /* Mobile Portrait – 0.75x der früheren großen Variante + 90vw Breite */
+  /* Mobile Portrait – explizit gewünschte Größe + 90vw Breite */
   @media (max-width:420px) and (orientation:portrait){
-    h1{ font-size:clamp(45px,13.5vw,81px); width:90vw; max-width:90vw; }
+    h1{ font-size:clamp(45px,16.5vw,81px); width:90vw; max-width:90vw; }
   }
 
   .actions{display:flex;gap:8px;pointer-events:auto;transition:all var(--t-sync) ease-in-out;flex-wrap:wrap;justify-content:center}
@@ -131,34 +130,39 @@
   }
   .menu.open .panel{display:flex}
 
-  .menu .item{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:var(--btn-h);padding:0 var(--btn-pad-x);border-radius:10px;cursor:pointer;background:#000;color:#fff;transition:all var(--t-sync) ease-in-out;font-size:var(--btn-fs); border:0; white-space:nowrap}
+  .menu .item{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:var(--btn-h); padding:0 var(--btn-pad-x); border-radius:10px; cursor:pointer;
+    background:#000; color:#fff; transition:all var(--t-sync) ease-in-out; font-size:var(--btn-fs); border:0; white-space:nowrap
+  }
   .menu .item .label{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent;transition:all var(--t-sync) ease-in-out}
   .menu .item:hover{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:240% 240%;color:#000}
   .menu .item:hover .label{background:none;color:#000}
   .menu .item:active{transform:translateY(1px)}
 
-  /* Mobile Dropdown: mittig, max. Breite = Viewport, Umbruch, Sichtbarkeit Landscape */
-  @media (max-width: 420px){
+  /* Mobile Portrait: Panel mittig, breite begrenzen, Umbrechen + min-content Höhe */
+  @media (max-width: 420px) and (orientation:portrait){
     .menu .panel{
-      left:50%; transform:translateX(-50%);
       width:auto; max-width:calc(100vw - 24px);
       padding:6px 0;
-      max-height:50vh; overflow:auto;
-      align-items:stretch;
+      max-height:50vh; overflow:auto; align-items:stretch;
     }
     .menu .item{
-      width:100%;
-      white-space:normal;
-      text-align:center;
-      line-height:1.15;
+      height:auto; min-height:var(--btn-h);
+      width:100%; white-space:normal; text-align:center; line-height:1.15;
       padding-left:16px; padding-right:16px;
     }
   }
+  /* Mobile Landscape: Panel in EINER REIHE anordnen */
   @media (max-height:420px) and (orientation:landscape){
-    .menu .panel{ max-height:60vh; }
+    .menu .panel{ max-height:60vh; flex-direction:row; gap:8px; justify-content:center; max-width:calc(100vw - 24px); }
+    .menu .item{ width:auto; white-space:nowrap; height:var(--btn-h); }
   }
 
-  .bottomUI{position:absolute;left:32px;right:32px;bottom:40px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .bottomUI{
+    position:absolute;left:32px;right:32px;bottom:40px;z-index:1;  /* niedrigste UI-Ebene */
+    display:flex;flex-direction:column;align-items:center;gap:8px
+  }
   .feedback{display:flex;justify-content:center;align-items:center;gap:10px;pointer-events:auto;font-size:12px;opacity:.9}
   .iconbtn{background:transparent;border:0;cursor:pointer;line-height:1;padding:2px 3px;display:inline-flex;align-items:center;opacity:.55;transition:all var(--t-sync) ease-in-out}
   .iconbtn:hover{opacity:.85;transform:translateY(-1px)} .iconbtn.active{opacity:1}
@@ -221,13 +225,8 @@
   .drawer input[type="range"]::-moz-range-track{height:2px;background:rgba(255,255,255,.35);border:0;border-radius:0}
   .drawer select{height:32px;background:#000;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:0 8px;transition:all var(--t-sync) ease-in-out;max-width:100%}
 
-  .gtools{
-    display:flex; gap:6px; align-self:end; justify-self:end;
-    grid-column: -2 / -1;
-  }
-  @media (max-width:800px){
-    .gtools{grid-column: 1 / -1; justify-self:end; margin-top:8px;}
-  }
+  .gtools{ display:flex; gap:6px; align-self:end; justify-self:end; grid-column:-2 / -1; }
+  @media (max-width:800px){ .gtools{ grid-column:1 / -1; justify-self:end; margin-top:8px; } }
   .gtools .btn{height:36px;font-size:16px;padding:0 12px;border-radius:10px}
 
   .minmax{display:none;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);pointer-events:none}
@@ -267,7 +266,7 @@
         <div class="menu" id="menu">
           <button id="chev" class="btn" aria-haspopup="true" aria-expanded="false" title="More options"><span class="chev">▾</span></button>
           <div class="panel" id="panel">
-            <div class="item" id="optOrig"><span class="label">Download flashy GIF in original size <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span></span></div>
+            <div class="item" id="optOrig"><span class="label">Download original size flashy GIF <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span></span></div>
             <div class="item" id="optShare"><span class="label">Share flashy GIF <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span></span></div>
           </div>
         </div>
@@ -395,7 +394,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js" crossorigin="anonymous"></script>
 
 <script>
-/* --- (JS unverändert gegenüber letzter Version) --- */
 document.addEventListener('DOMContentLoaded', () => {
   const CFG={IG_SIZE:1080,QUALITY:15, MAX_MB:15};
   const DEFAULT_PARAMS={
@@ -449,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function humanStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;}
   const fileStamp=sfx=>`${S.origNameBase}_flashy_${humanStamp()}${sfx?`-${sfx}`:''}.gif`;
 
+  /* ---------- Border ---------- */
   let pathLen=0;
   function buildBorder(){
     const r=drop.getBoundingClientRect(); const W=Math.round(r.width), H=Math.round(r.height);
@@ -459,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const setBorderProgress=p=>{ if(!pathLen) return; prog.style.strokeDashoffset=`${(1-p)*pathLen}` }
 
+  /* ---------- Controls ---------- */
   const ctrlIds=['cSpeed','cZoom','cWobble','cRotate','cFPS','cSecs','cOverlay','cOvOp','cOvOff','cBlend','cGrad','cGradOp','cGlitter','cGltAmt','cLiquid','cLiqAmp','cLiqFreq','cLiqSrc','cGlitch','cGltInt','cGltAmp','cGltFreq','cFlash','cFlStr','cFlFreq'];
 
   function writeControls(){
@@ -492,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('change',()=>{onParams(); flashFx();},{passive:true});
   });
 
+  /* Debug-Werte-Deko */
   function attachDecorations(){
     document.querySelectorAll('.tool').forEach(tool=>{
       const r=tool.querySelector('input[type="range"]'); if(!r) return;
@@ -530,6 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateRangeDecorations(){ document.querySelectorAll('input[type="range"]').forEach(updateRangeDecoration); }
   document.addEventListener('keydown',e=>{ if(S.busy) return; if(e.key && e.key.toLowerCase()==='d'){ document.body.classList.toggle('debugOn'); } });
 
+  /* ---------- Title ---------- */
   function setTitle(st){
     const idleText = S.mobile
       ? 'Tap to flashify <span class="nowrap">… <span class="emoji">⚡️</span></span>'
@@ -548,17 +550,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function openMenu(){if(S.busy || !S.hasUserImage) return; menu.classList.add('open');chev.setAttribute('aria-expanded','true');S.menu=true}
-  function closeMenu(){menu.classList.remove('open');chev.setAttribute('aria-expanded','false');S.menu=false}
+  /* ---------- Menu ---------- */
+  function openMenu(){if(S.busy || !S.hasUserImage) return; menu.classList.add('open');chev.setAttribute('aria-expanded','true');S.menu=true; updateFeedbackVisibility();}
+  function closeMenu(){menu.classList.remove('open');chev.setAttribute('aria-expanded','false');S.menu=false; updateFeedbackVisibility();}
   document.getElementById('chev').addEventListener('click',e=>{if(S.busy || !S.hasUserImage) return; e.stopPropagation();S.menu?closeMenu():openMenu()});
   document.addEventListener('click',e=>{if(!menu.contains(e.target)) closeMenu()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape') closeMenu()});
 
-  function toggleControls(force){ if(S.busy) return; const n=force===true?true:force===false?false:!S.controls;S.controls=n;drawer.classList.toggle('show',S.controls)}
+  /* ---------- Controls Drawer ---------- */
+  function toggleControls(force){ if(S.busy) return; const n=force===true?true:force===false?false:!S.controls;S.controls=n;drawer.classList.toggle('show',S.controls); updateFeedbackVisibility(); }
   document.addEventListener('keydown',e=>{if(S.busy) return; if(e.key&&e.key.toLowerCase()==='f') toggleControls()});
   $('subline').addEventListener('click',e=>{if(S.busy) return; e.stopPropagation();toggleControls()});
   $('closeDrawer').addEventListener('click',()=>toggleControls(false));
 
+  /* ---------- Feedback / Toast ---------- */
   let vote=null, toastTimer=null;
   function hideToast(){ toast.classList.remove('show'); toast.innerHTML=''; }
   function scheduleToastAutoclose(ms=5000){ if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; } toastTimer=setTimeout(()=>{ hideToast(); }, ms); }
@@ -567,6 +572,17 @@ document.addEventListener('DOMContentLoaded', () => {
   $('thumbUp').addEventListener('click',e=>{ if(S.busy) return; e.stopPropagation(); const was=(vote==='up'); vote=was?null:'up'; e.currentTarget.classList.toggle('active',vote==='up'); $('thumbDown').classList.remove('active'); hideToast(); if(vote==='up') showThanksToast(); });
   $('thumbDown').addEventListener('click',e=>{ if(S.busy) return; e.stopPropagation(); const was=(vote==='down'); vote=was?null:'down'; e.currentTarget.classList.toggle('active',vote==='down'); $('thumbUp').classList.remove('active'); hideToast(); if(vote==='down'){ const to='jonas.a.schmidt+flashify@gmail.com'; const subj=`Flashify feedback — negative — ${humanStamp()}`; const body=`What's wrong?\n\nParams (JSON):\n${JSON.stringify(S.params,null,2)}\n\nUser agent:\n${navigator.userAgent}`; location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`; } });
 
+  /* ---------- Layout Guard für Feedback ---------- */
+  function updateFeedbackVisibility(){
+    const dropH = drop.clientHeight;
+    const centerH = document.querySelector('.center').offsetHeight;
+    const fbH = feedback.offsetHeight || 28;
+    const mustHide = S.controls || S.menu || (centerH + fbH + 72 > dropH);
+    feedback.classList.toggle('hidden', mustHide);
+    if(mustHide) hideToast();
+  }
+
+  /* ---------- Rendering ---------- */
   let stage=null, liq=null, pad=null, padCtx=null;
   function ensureStage(W,H){ if(!stage){stage=document.createElement('canvas');} if(!liq){liq=document.createElement('canvas');} if(stage.width!==W||stage.height!==H){stage.width=W;stage.height=H;} if(liq.width!==W||liq.height!==H){liq.width=W;liq.height=H;} }
   function ensurePad(W,H,p){const needW=W+2*p, needH=H+2*p; if(!pad || pad.width!==needW || pad.height!==needH){pad=document.createElement('canvas'); pad.width=needW; pad.height=needH; padCtx=pad.getContext('2d',{willReadFrequently:true}); padCtx.imageSmoothingEnabled=true; try{padCtx.imageSmoothingQuality='high'}catch{}}}
@@ -697,6 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return await done;
   }
 
+  /* ---------- Enable/Busy ---------- */
   function setControlsEnabled(on){
     drawer.querySelectorAll('input,select,button').forEach(el=>{ el.disabled=!on; });
   }
@@ -709,7 +726,17 @@ document.addEventListener('DOMContentLoaded', () => {
     shield.style.pointerEvents = S.busy?'auto':'none';
   }
 
-  async function nativeSave(blob, filename){
+  /* ---------- Save / Share ---------- */
+  async function nativeSaveOrShare(blob, filename){
+    const file=new File([blob], filename, {type:'image/gif'});
+
+    // Mobile: bevorzugt native Share-UI anbieten (Fotos/Dateien)
+    if (S.mobile && navigator.canShare && (()=>{try{return navigator.canShare({files:[file]})}catch{return false}})()){
+      try{ await navigator.share({files:[file], title:'Flashify', text:'Made with Flashify ⚡️'}); return 'share'; }
+      catch(e){ /* Abbruch durch User */ }
+    }
+
+    // Desktop/HTTPS: native Picker
     const hasPicker = 'showSaveFilePicker' in window && window.isSecureContext;
     if (hasPicker){
       try{
@@ -724,6 +751,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if(e && e.name==='AbortError') return 'canceled';
       }
     }
+
+    // Fallback: Anchor-Download
     const url = URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=filename||'flashy.gif'; a.rel='noopener';
     document.body.appendChild(a); a.click(); a.remove();
@@ -731,6 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'anchor';
   }
 
+  /* ---------- Cache/Sig ---------- */
   function bmpSig(){
     const iw=S.bmp?.width||S.bmp?.naturalWidth||0, ih=S.bmp?.height||S.bmp?.naturalHeight||0;
     return `${S.origNameBase}:${iw}x${ih}`;
@@ -797,7 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setBorderProgress(0.02);
       const blob = (kind==='sq') ? await getSquareBlob() : await getOrigBlob();
       const filename = (kind==='sq') ? fileStamp('1080') : fileStamp('orig');
-      const method = await nativeSave(blob, filename);
+      const method = await nativeSaveOrShare(blob, filename);
       if(method==='anchor'){ showSavedToast(); }
     } catch(e){ err('export failed', e); }
     finally { setBorderProgress(1); setProcessing(false); setTitle('idle'); }
@@ -824,6 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* ---------- Upload Guards ---------- */
   function overLimit(file){ return file && file.size > CFG.MAX_MB * 1024 * 1024; }
   function guardAndStart(file){
     if(!file) return;
@@ -834,6 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
     start(file);
   }
 
+  /* ---------- Actions ---------- */
   dl.addEventListener('click', e=>{ e.preventDefault(); if(S.busy || !S.hasUserImage) return; startExport('sq'); });
   optOrig.addEventListener('click', e=>{ if(S.busy || !S.hasUserImage) return; e.stopPropagation(); startExport('orig'); });
   optShare.addEventListener('click', e=>{ if(S.busy || !S.hasUserImage) return; e.stopPropagation(); shareSquare(); });
@@ -855,6 +887,55 @@ document.addEventListener('DOMContentLoaded', () => {
     S.cache.sqBlob=null; S.cache.origBlob=null;
   }
 
+  /* ---------- Randomize / Reset ---------- */
+  function rnd(min,max,step=1){ const v = min + Math.random()*(max-min); return step===1 ? v : Math.round(v/step)*step; }
+  function irnd(min,max){ return Math.round(min + Math.random()*(max-min)); }
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)] }
+
+  function randomizeParams(){
+    const p=S.params;
+    p.speed = +rnd(0.1,2,0.05).toFixed(2);
+    p.zoomPct = +rnd(0,8,0.5).toFixed(1);
+    p.wobble = irnd(0,12);
+    p.rotate = +rnd(0,6,0.5).toFixed(1);
+    p.fps = irnd(6,20);
+    p.secs = +rnd(1,3,0.1).toFixed(1);
+
+    p.overlay = Math.random()<0.6;
+    p.ovOpacity = +rnd(0,1,0.05).toFixed(2);
+    p.ovOffset = irnd(-30,30);
+    p.blend = pick(['multiply','screen','lighten','overlay','soft-light','normal']);
+
+    p.grad = Math.random()<0.8;
+    p.gradOp = +rnd(0,1,0.05).toFixed(2);
+
+    p.glitter = Math.random()<0.7;
+    p.glitAmt = irnd(0,120);
+
+    p.liquid = Math.random()<0.75;
+    p.liqAmp = +rnd(0,12,0.5).toFixed(1);
+    p.liqFreq= +rnd(0.5,6,0.5).toFixed(1);
+    p.liqSrc = irnd(1,4);
+
+    p.glitch = Math.random()<0.4;
+    p.glitchInt = irnd(0,20);
+    p.glitchAmp = irnd(0,40);
+    p.glitchFreq= +rnd(0.5,6,0.5).toFixed(1);
+
+    p.flash = Math.random()<0.5;
+    p.flashStrength = +rnd(0,1,0.05).toFixed(2);
+    p.flashFreq = +rnd(0.5,6,0.5).toFixed(1);
+
+    writeControls(); saveParams(); invalidateCache(); schedulePrecompute(); if(S.bmp) drawLive(performance.now()/1000); flashFx();
+  }
+  function resetParams(){
+    S.params = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+    writeControls(); saveParams(); invalidateCache(); schedulePrecompute(); if(S.bmp) drawLive(performance.now()/1000); flashFx();
+  }
+  $('btnRandom').addEventListener('click',(e)=>{e.preventDefault(); e.stopPropagation(); if(S.busy) return; randomizeParams();});
+  $('btnReset').addEventListener('click',(e)=>{e.preventDefault(); e.stopPropagation(); if(S.busy) return; resetParams();});
+
+  /* ---------- Start/Load ---------- */
   async function start(file){
     try{
       S.hasUserImage = true;
@@ -865,7 +946,8 @@ document.addEventListener('DOMContentLoaded', () => {
       S.bmp=await createImageBitmap(file).catch(async()=>{const img=new Image(); img.src=S.srcURL; await img.decode(); return img});
       fitCanvasTo(drop,live); startPreview();
       setTitle('idle'); flashFx();
-      actions.classList.remove('hidden'); feedback.classList.remove('hidden'); subline.textContent='Adjust flashyness …'; subline.classList.remove('hidden'); drop.classList.add('ready');
+      actions.classList.remove('hidden'); subline.textContent='Adjust flashyness …'; subline.classList.remove('hidden'); drop.classList.add('ready');
+      updateFeedbackVisibility();
       schedulePrecompute();
     }catch(e){err('start',e); setTitle('idle')}
   }
@@ -876,7 +958,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await img.decode();
     const name = nameGuess || (src.split('/').pop() || 'demo.jpg');
 
-    S.hasUserImage = false;
+    S.hasUserImage = false;  // Demo: kein Export-UI
     setTitle('loading'); actions.classList.add('hidden'); feedback.classList.add('hidden');
     drop.classList.remove('ready'); setBorderProgress(0); S.phHidden=false; cleanURLs(); invalidateCache();
     S.file=null; S.origNameBase=baseNoExt(name);
@@ -886,6 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTitle('idle'); flashFx();
     subline.textContent='Adjust flashyness …'; subline.classList.remove('hidden'); 
     drop.classList.add('ready');
+    updateFeedbackVisibility();
   }
 
   async function tryLoadDemo(){
@@ -908,6 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadParams(); fitCanvasTo(drop,live); buildBorder(); attachDecorations();
     await tryLoadDemo();
     setTitle('idle');
+    updateFeedbackVisibility();
     log('Ready. Tap/Click background or drop a file. Press "F" for controls, "D" for debug values.');
   })();
 
@@ -915,6 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
     detectMobile();
     fitCanvasTo(drop,live); buildBorder(); updateRangeDecorations();
     if(!S.busy) setTitle('idle');
+    updateFeedbackVisibility();
     if(S.bmp) drawLive(performance.now()/1000)
   },{passive:true});
 });
