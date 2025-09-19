@@ -10,31 +10,27 @@
 
 <style>
   :root{
-    /* Desktop Defaults */
     --drop-margin:24px;
     --drop-radius:48px;
-    --drawer-inset:32px;      /* Abstand Overlay zu Drop-Area-Innenkante */
-    --drawer-pad:32px;        /* Innen-Padding Overlay */
+    --drawer-inset:32px;
+    --drawer-pad:32px;
     --border-w:4px; --dash-l:16px; --gap-l:16px;
     --stroke-normal:.25; --stroke-hover:.5;
     --btn-h:52px; --btn-fs:20px; --btn-pad-x:24px;
     --t-sync:.125s; --range-w:128px;
-    --cols-gap:36px;          /* Spaltengap im Overlay */
-    --group-gap:12px;         /* interner Gruppenabstand (Desktop) */
+    --cols-gap:36px; --group-gap:12px;
   }
 
-  /* Kompakt für schmale Geräte wie iPhone 12 mini */
   @media (max-width: 420px){
     :root{
       --drop-margin:12px;
-      --drop-radius:40px;           /* 8px weniger als Desktop */
-      /* Neu: Overlay auf Mobile mit +8px mehr Margin & +12px mehr Padding */
-      --drawer-inset:14px;          /* vorher 6px → jetzt 14px */
-      --drawer-pad:28px;            /* vorher 16px → jetzt 28px */
+      --drop-radius:40px;
+      --drawer-inset:14px;    /* +8px vs vorher */
+      --drawer-pad:28px;      /* +12px vs vorher */
       --btn-h:46px; --btn-fs:18px; --btn-pad-x:18px;
       --range-w:112px;
-      --cols-gap:24px;              /* engeres Spaltengap */
-      --group-gap:36px;             /* vert. Abstand zwischen Gruppen je Spalte */
+      --cols-gap:24px;
+      --group-gap:36px;       /* vertikaler Abstand zw. Gruppen */
     }
   }
 
@@ -46,7 +42,8 @@
     -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   }
   button,input,select,textarea{font-family:inherit}
-  .nowrap{white-space:nowrap; display:inline-block}
+  .nowrap{white-space:nowrap;display:inline}
+  .emoji{display:inline;vertical-align:baseline}
 
   .drop{
     position:fixed;
@@ -76,19 +73,22 @@
     padding-top:36px; padding-bottom:36px; /* Mindestabstand Top/Bottom */
   }
   h1{
-    margin:0; font-weight:800; letter-spacing:.2px;
+    margin:0; padding:0 4px;  /* etwas weniger horizontaler Puffer für Fits */
+    font-weight:800; letter-spacing:.2px;
     font-size:clamp(28px,6vw,54px); line-height:1.06;
     text-shadow:0 2px 16px rgba(0,0,0,.45);
     -webkit-hyphens:none; hyphens:none; word-break:normal; overflow-wrap:normal;
-    max-width:88%;
+    max-width:94%;           /* mehr nutzbare Breite gegen Umbruch */
   }
+  /* Mobile Basis */
   @media (max-width:420px){
-    /* Mobile größer – bricht in 2–3 Zeilen, ohne Trennung */
-    h1{ font-size:clamp(34px,9.6vw,64px); max-width:92%; }
+    .center{max-width:98%}   /* mehr Breite für Überschrift */
+    h1{ font-size:clamp(34px,9.6vw,64px); max-width:98%; }
   }
-  /* Portrait: 1.75x gegenüber der mobilen Basis */
+  /* Mobile Portrait – **reduziert auf 0.75** der früheren 1.75x-Größe */
   @media (max-width:420px) and (orientation:portrait){
-    h1{ font-size:clamp(60px,18vw,108px); }
+    /* vorher: clamp(60px,18vw,108px) → jetzt *0.75 */
+    h1{ font-size:clamp(45px,13.5vw,81px); }
   }
 
   .actions{display:flex;gap:8px;pointer-events:auto;transition:all var(--t-sync) ease-in-out;flex-wrap:wrap;justify-content:center}
@@ -115,7 +115,7 @@
 
   .gradText{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  .dots{display:inline;margin-left:.1em}
+  .dots{display:inline;margin-left:.1em; white-space:nowrap} /* nie umbrechen */
   .dots span{display:inline;opacity:.25}
   @keyframes blinkDot{0%{opacity:.25}8%{opacity:1}20%{opacity:.25}100%{opacity:.25}}
   .busy .dots span{animation:blinkDot 1.05s infinite ease-in-out both}
@@ -124,14 +124,38 @@
 
   .menu{position:relative;pointer-events:auto}
   #chev.btn{padding:0 18px}.chev{font-weight:900}
-  .menu .panel{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);z-index:5;display:none;flex-direction:column;gap:8px}
+  .menu .panel{
+    position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);
+    z-index:5;display:none;flex-direction:column;gap:8px;
+  }
   .menu.open .panel{display:flex}
 
-  .menu .item{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:var(--btn-h);padding:0 var(--btn-pad-x);border-radius:10px;cursor:pointer;background:#000;color:#fff;white-space:nowrap;transition:all var(--t-sync) ease-in-out;font-size:var(--btn-fs); border:0}
+  .menu .item{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:var(--btn-h);padding:0 var(--btn-pad-x);border-radius:10px;cursor:pointer;background:#000;color:#fff;transition:all var(--t-sync) ease-in-out;font-size:var(--btn-fs); border:0; white-space:nowrap}
   .menu .item .label{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent;transition:all var(--t-sync) ease-in-out}
   .menu .item:hover{background:linear-gradient(45deg,#00ffd5,#6af0ff,#8d8aff,#ff77e1,#ffc76a);background-size:240% 240%;color:#000}
   .menu .item:hover .label{background:none;color:#000}
   .menu .item:active{transform:translateY(1px)}
+
+  /* **Mobile**: Panel mittig, Breite ans Viewport begrenzen, umbrechen, Sichtbarkeit in Landscape */
+  @media (max-width: 420px){
+    .menu .panel{
+      left:50%; transform:translateX(-50%);
+      width:auto; max-width:calc(100vw - 24px);
+      padding:6px 0;
+      max-height:50vh; overflow:auto;
+      align-items:stretch;
+    }
+    .menu .item{
+      width:100%;
+      white-space:normal;          /* label darf umbrechen */
+      text-align:center;
+      line-height:1.15;
+      padding-left:16px; padding-right:16px;
+    }
+  }
+  @media (max-height:420px) and (orientation:landscape){
+    .menu .panel{ max-height:60vh; }
+  }
 
   .bottomUI{position:absolute;left:32px;right:32px;bottom:40px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:8px}
   .feedback{display:flex;justify-content:center;align-items:center;gap:10px;pointer-events:auto;font-size:12px;opacity:.9}
@@ -169,7 +193,6 @@
     max-height:calc(100% - (var(--drawer-inset)*2));
     overflow:auto;
   }
-  /* Nur auf Mobile: Overlay-Ecken +4px → näher an Drop-Radius */
   @media (max-width:420px){
     .drawer{ border-radius:calc(var(--drop-radius) - 12px); }
   }
@@ -197,10 +220,9 @@
   .drawer input[type="range"]::-moz-range-track{height:2px;background:rgba(255,255,255,.35);border:0;border-radius:0}
   .drawer select{height:32px;background:#000;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:0 8px;transition:all var(--t-sync) ease-in-out;max-width:100%}
 
-  /* Randomize/Reset unten rechts als Grid-Item (kollisionsfrei) */
   .gtools{
     display:flex; gap:6px; align-self:end; justify-self:end;
-    grid-column: -2 / -1; /* letzte Spalte */
+    grid-column: -2 / -1;
   }
   @media (max-width:800px){
     .gtools{grid-column: 1 / -1; justify-self:end; margin-top:8px;}
@@ -233,17 +255,19 @@
     </div>
 
     <div class="center">
-      <h1 id="title" class="busy">Loading <span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
+      <h1 id="title" class="busy">
+        Loading <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span>
+      </h1>
 
       <div class="actions hidden" id="actions">
         <a id="download" class="btn" href="#" download="">
-          <span class="label">Download flashy GIF <span class="dots"><span>.</span><span>.</span><span>.</span></span></span>
+          <span class="label">Download flashy GIF <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span></span>
         </a>
         <div class="menu" id="menu">
           <button id="chev" class="btn" aria-haspopup="true" aria-expanded="false" title="More options"><span class="chev">▾</span></button>
           <div class="panel" id="panel">
-            <div class="item" id="optOrig"><span class="label">Download flashy GIF in original size <span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
-            <div class="item" id="optShare"><span class="label">Share flashy GIF <span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
+            <div class="item" id="optOrig"><span class="label">Download flashy GIF in original size <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span></span></div>
+            <div class="item" id="optShare"><span class="label">Share flashy GIF <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span></span></div>
           </div>
         </div>
       </div>
@@ -356,7 +380,6 @@
           </div>
         </section>
 
-        <!-- Tools unten rechts -->
         <div class="gtools">
           <button id="btnRandom" class="btn btnGhost btn--sm" title="Randomize parameters"><span class="label">Randomize</span></button>
           <button id="btnReset"  class="btn btnGhost btn--sm" title="Reset"><span class="label">Reset</span></button>
@@ -506,10 +529,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown',e=>{ if(S.busy) return; if(e.key && e.key.toLowerCase()==='d'){ document.body.classList.toggle('debugOn'); } });
 
   function setTitle(st){
-    const idleText = S.mobile ? 'Tap to flashify … <span class="nowrap">⚡️</span>' : 'Drop to flashify … <span class="nowrap">⚡️</span>';
-    if(st==='loading'){title.classList.add('busy');title.innerHTML=`Loading <span class="dots"><span>.</span><span>.</span><span>.</span></span>`;}
-    else if(st==='processing'){title.classList.add('busy');title.innerHTML=`Flashifying <span class="dots"><span>.</span><span>.</span><span>.</span></span> <span class="nowrap">⚡️</span>`;}
-    else{title.classList.remove('busy');title.innerHTML=idleText;}
+    const idleText = S.mobile
+      ? 'Tap to flashify <span class="nowrap">… <span class="emoji">⚡️</span></span>'
+      : 'Drop to flashify <span class="nowrap">… <span class="emoji">⚡️</span></span>';
+    if(st==='loading'){
+      title.classList.add('busy');
+      title.innerHTML=`Loading <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span></span>`;
+    }
+    else if(st==='processing'){
+      title.classList.add('busy');
+      title.innerHTML=`Flashifying <span class="nowrap"><span class="dots"><span>.</span><span>.</span><span>.</span></span> <span class="emoji">⚡️</span></span>`;
+    }
+    else{
+      title.classList.remove('busy');
+      title.innerHTML=idleText;
+    }
   }
 
   function openMenu(){if(S.busy || !S.hasUserImage) return; menu.classList.add('open');chev.setAttribute('aria-expanded','true');S.menu=true}
@@ -520,8 +554,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleControls(force){ if(S.busy) return; const n=force===true?true:force===false?false:!S.controls;S.controls=n;drawer.classList.toggle('show',S.controls)}
   document.addEventListener('keydown',e=>{if(S.busy) return; if(e.key&&e.key.toLowerCase()==='f') toggleControls()});
-  subline.addEventListener('click',e=>{if(S.busy) return; e.stopPropagation();toggleControls()});
-  closeDrawer.addEventListener('click',()=>toggleControls(false));
+  $('subline').addEventListener('click',e=>{if(S.busy) return; e.stopPropagation();toggleControls()});
+  $('closeDrawer').addEventListener('click',()=>toggleControls(false));
 
   /* ---------- Feedback / Toast ---------- */
   let vote=null, toastTimer=null;
@@ -532,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('thumbUp').addEventListener('click',e=>{ if(S.busy) return; e.stopPropagation(); const was=(vote==='up'); vote=was?null:'up'; e.currentTarget.classList.toggle('active',vote==='up'); $('thumbDown').classList.remove('active'); hideToast(); if(vote==='up') showThanksToast(); });
   $('thumbDown').addEventListener('click',e=>{ if(S.busy) return; e.stopPropagation(); const was=(vote==='down'); vote=was?null:'down'; e.currentTarget.classList.toggle('active',vote==='down'); $('thumbUp').classList.remove('active'); hideToast(); if(vote==='down'){ const to='jonas.a.schmidt+flashify@gmail.com'; const subj=`Flashify feedback — negative — ${humanStamp()}`; const body=`What's wrong?\n\nParams (JSON):\n${JSON.stringify(S.params,null,2)}\n\nUser agent:\n${navigator.userAgent}`; location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`; } });
 
-  /* ---------- Rendering pipeline ---------- */
+  /* ---------- Rendering pipeline (unverändert) ---------- */
   let stage=null, liq=null, pad=null, padCtx=null;
   function ensureStage(W,H){ if(!stage){stage=document.createElement('canvas');} if(!liq){liq=document.createElement('canvas');} if(stage.width!==W||stage.height!==H){stage.width=W;stage.height=H;} if(liq.width!==W||liq.height!==H){liq.width=W;liq.height=H;} }
   function ensurePad(W,H,p){const needW=W+2*p, needH=H+2*p; if(!pad || pad.width!==needW || pad.height!==needH){pad=document.createElement('canvas'); pad.width=needW; pad.height=needH; padCtx=pad.getContext('2d',{willReadFrequently:true}); padCtx.imageSmoothingEnabled=true; try{padCtx.imageSmoothingQuality='high'}catch{}}}
@@ -790,7 +824,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ---- Upload Guards (15 MB) ----
   function overLimit(file){ return file && file.size > CFG.MAX_MB * 1024 * 1024; }
   function guardAndStart(file){
     if(!file) return;
